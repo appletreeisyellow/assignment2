@@ -171,13 +171,18 @@ function cube( points_transform )
 	}
 inherit(cube, shape);
 
-	cube.prototype.populate = function( recipient, points_transform )
-	{
-			var m_strip = new rectangular_strip(); 
-			for( var i = 0; i < 3; i++ )										// Build a cube by inserting six triangle strips into the lists.
-				for( var j = 0; j < 2; j++ )
-					m_strip.populate( recipient, 1, mult( points_transform, mult( rotation( 90, vec3( i==0, i==1, i==2 ) ), translation( j - .5, 0, 0 ) ) ) );
-	}
+
+cube.prototype.populate = function (recipient, points_transform) 
+  {
+    var m_strip = new rectangular_strip();
+    for (var i = 0; i < 3; i++)		// Build a cube by inserting six triangle strips into the lists.
+        for (var j = 0; j < 2; j++) {
+            var transform = translation(-.5, 0, 0);                        // Left
+            transform = mult(rotation(180 * j, vec3(0, 0, 1)), transform); // Right if j
+            transform = mult(rotation(90, vec3(i == 0, -(i == 1), i == 2)), transform); // rotate to match face
+            m_strip.populate(recipient, 1, transform);
+        }
+  };
 	
 
 function sphere( points_transform, max_subdivisions )		// Build a complicated sphere using subdivision, starting with a simple tetrahedron.  
@@ -408,6 +413,7 @@ triangle.prototype.populate = function()
 };
 
 
+
 function triangle( points_transform ) // Argument points_transform: Identity if we’re just building a triangle. It does good when building other
 // compound shapes by populating them with a pre-transformed triangle
 {
@@ -431,40 +437,122 @@ triangle.prototype.populate = function( recipient, points_transform ) // The mea
 	recipient.vertices[i] = vec3( mult_vec( points_transform, vec4( recipient.vertices[ i ], 1 ) ) );
 };
 
-/*
-function windmill( points_transform )// Argument points_transform: Always identity if we’re just building a windmill. It does good when building other
-// compound shapes by populating them with a pre-transformed windmill
+function tetrahedron()
 {
-	shape.call(this); // Inherit class shape’s array members by calling parent constructor
-	if( !arguments.length) return; // Pass no arguments if you just want to make an empty dummy object that inherits everything, for populating other shapes
-	this.populate( this, points_transform ); // Otherwise, a new windmill immediately populates its own arrays with windmill points,
-	this.init_buffers(); // Then sends its arrays to the graphics card into new buffers
+	shape.call(this);
+	this.populate();
+	this.init_buffers();
 }
 
-inherit(windmill, shape);
+inherit(tetrahedron, shape);
 
-windmill.prototype.populate = function( recipient, points_transform ) // The meat of the windmill starts here:
+tetrahedron.prototype.populate = function()
 {
-	var offset = recipient.vertices.length; var index_offset = recipient.indices.length; // Recipient's previous size
-	recipient.vertices.push( vec3( 0, 0, 0 ) );
-	recipient.normals. push( vec3( 0, -1, 0 ) );
-	recipient.texture_coords.push( vec2( 0, 0 ) );
-	for( var i = 0, i_max = 4; i < i_max; i++ )
-	{
-		var rotation = rotate( i * 360/i_max, 0, 1, 0 );
-		var newPoint = mult_vec( rotation, vec4( 1, 0, 0, 1 ) );
-		var newNormal = mult_vec( transpose( inverse( rotation ) ), vec4( 0, 0, 1, 1 ) );
-		recipient.vertices.push( vec3( newPoint[0], newPoint[1], newPoint[2] ) );
-		recipient.vertices.push( vec3( newPoint[0], 1, newPoint[2] ) );
-		recipient.normals.push( vec3( newNormal ) );
-		recipient.normals.push( vec3( newNormal ) );
-		recipient.texture_coords.push( vec2( 0, 1 ) );
-		recipient.texture_coords.push( vec2( 1, 0 ) );
-		recipient.indices.push ( 0 ); recipient.indices.push ( 2 * i + 1 ); recipient.indices.push ( 2 * i + 2 );
-	}
-	for( var i = offset; i < recipient.vertices.length; i++ ) // Apply points_transform to those points added during this call
-		recipient.vertices[i] = vec3( mult_vec( points_transform, vec4( recipient.vertices[ i ], 1 ) ) );
-};*/
+	var a = 1/Math.sqrt(3);
+
+/*
+	// Mathod 1: A tetrahedron with shared vertices. 
+	// Compact, perfrom better, but can't have seams (flat shading / textures)
+	this.vertices.push(vec3(0, 0, 0), vec3(0,1,0), vec3(1, 0, 0), vec3(0, 0, 1));
+	this.normals.push(vec3(-a, -a, -a), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, 1));
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
+	this.indices.push(0, 1, 2, 0, 1, 3, 0, 2, 3, 1, 2, 3); // Vertices shared multiple times
+*/
+	// Method 2: A tetrahedron with four independent triangles
+	this.vertices.push(vec3(0, 0, 0), vec3(0, 1, 0), vec3(1, 0, 0));
+	this.vertices.push(vec3(0, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1));
+	this.vertices.push(vec3(0, 0, 0), vec3(1, 0, 0), vec3(0, 0, 1));
+	this.vertices.push(vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0));
+
+	// Method 2 is flat shaded, sice each triangel has its own normal.
+	this.normals.push(vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1));
+	this.normals.push(vec3(1, 0, 0), vec3(1, 0, 0), vec3(1, 0, 0));
+	this.normals.push(vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0));
+	this.normals.push(vec3(a, a, a), vec3(a, a, a), vec3(a, a, a));
+
+	// Each face in method 2 also gets ites own set of texture coords 
+	// (half the image is mapped onto each face)
+	// Couldn't do this with shared vertices since it involves difference 
+	// results when approaching the same point from different directions
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
+	//this.texture_coords.push(vec3(0, 0, 0), vec3(0, 1, 0), vec3(1, 0, 0));
+	//this.texture_coords.push(vec3(0, 0, 0), vec3(0, 1, 0), vec3(1, 0, 0));
+	//this.texture_coords.push(vec3(0, 0, 0), vec3(0, 1, 0), vec3(1, 0, 0));
+	//this.texture_coords.push(vec3(0, 0, 0), vec3(0, 1, 0), vec3(1, 0, 0));
+
+	this.indices.push(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11); // unique vertices
+}
+
+function square()
+{
+	shape.call(this);
+	this.populate();
+	this.init_buffers();
+
+}
+
+inherit(square, shape);
+
+square.prototype.populate = function ()
+{
+	this.vertices.push(vec3(0, 0, 0), vec3(1, 0, 0), vec3(0, 0, 1));
+	this.vertices.push(vec3(0, 0, 1), vec3(-1, 0, 0), vec3(0, 0, 0));
+	this.vertices.push(vec3(0, 0, 0), vec3(-1, 0, 0), vec3(0, 0, -1));
+	this.vertices.push(vec3(0, 0, -1), vec3(1, 0, 0), vec3(0, 0, 0));
+
+	this.normals.push(vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0));
+	this.normals.push(vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0));
+	this.normals.push(vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0));
+	this.normals.push(vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0));
+
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
+
+	this.indices.push(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+}
+
+
+function squarePyramid()
+{
+	shape.call(this);
+	this.populate();
+	this.init_buffers();
+}
+
+inherit(squarePyramid, shape);
+
+squarePyramid.prototype.populate = function()
+{
+	var a = 1/Math.sqrt(3);
+
+	this.vertices.push(vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0));
+	this.vertices.push(vec3(0, 0, 1), vec3(0, 1, 0), vec3(-1, 0, 0));
+	this.vertices.push(vec3(-1, 0, 0), vec3(0, 1, 0), vec3(0, 0, -1));
+	this.vertices.push(vec3(0, 0, -1), vec3(0, 1, 0), vec3(1, 0, 0));
+	this.vertices.push(vec3(1, 0, 0), vec3(0, 0, 1), vec3(-1, 0, 0));
+	this.vertices.push(vec3(1, 0, 0), vec3(0, 0, -1), vec3(-1, 0, 0));
+
+	this.normals.push(vec3(a, a, a), 	vec3(a, a, a), 		vec3(a, a, a));
+	this.normals.push(vec3(-a, a, a), 	vec3(-a, a, a), 	vec3(-a, a, a));
+	this.normals.push(vec3(-a, -a, -a),	vec3(-a, -a, -a), 	vec3(-a, -a, -a));
+	this.normals.push(vec3(a, a, -a), 	vec3(a, a, -a), 	vec3(a, a, -a));
+	this.normals.push(vec3(0, -1, 0), 	vec3(0, -1, 0), 	vec3(0, -1, 0));
+	this.normals.push(vec3(0, -1, 0), 	vec3(0, -1, 0), 	vec3(0, -1, 0));
+
+	this.texture_coords.push(vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0));
+	this.texture_coords.push(vec3(0, 0, 1), vec3(0, 1, 0), vec3(-1, 0, 0));
+	this.texture_coords.push(vec3(-1, 0, 0), vec3(0, 1, 0), vec3(0, 0, -1));
+	this.texture_coords.push(vec3(0, 0, -1), vec3(0, 1, 0), vec3(1, 0, 0));
+	this.texture_coords.push(vec3(1, 0, 0), vec3(0, 0, 1), vec3(-1, 0, 0));
+	this.texture_coords.push(vec3(1, 0, 0), vec3(0, 0, -1), vec3(-1, 0, 0));
+
+	this.indices.push(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+}
 
 
 function capped_cylinder() // Combine a tube and two flattened triangle fans to make a solid cylinder
@@ -474,14 +562,18 @@ function capped_cylinder() // Combine a tube and two flattened triangle fans to 
 	{
 		self.m_tube = new cylindrical_strip(); 
 		self.m_fan = new triangle_fan_full;
+
 		var stack = [];
 		var object_transform = mat4();
+
 		self.m_tube.populate( self, 10, object_transform );
 		object_transform = mult( object_transform, translation(0, 0, .5));
+
 		stack.push( object_transform );
 		object_transform = mult( object_transform, scale(1, 1, 0));
-		self.m_fan.populate( self, 10, object_transform )
+		self.m_fan.populate( self, 10, object_transform );
 		object_transform = stack.pop();
+
 		object_transform = mult( object_transform, translation(0, 0, -.5)); // What if I tried doing this without the pop?
 		object_transform = mult( object_transform, scale(1, 1, 0));
 		self.m_fan.populate( self, 10, object_transform )
@@ -490,4 +582,3 @@ function capped_cylinder() // Combine a tube and two flattened triangle fans to 
 }
 
 inherit(capped_cylinder, shape);
-
