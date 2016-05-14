@@ -437,55 +437,6 @@ triangle.prototype.populate = function( recipient, points_transform ) // The mea
 	recipient.vertices[i] = vec3( mult_vec( points_transform, vec4( recipient.vertices[ i ], 1 ) ) );
 };
 
-function tetrahedron()
-{
-	shape.call(this);
-	this.populate();
-	this.init_buffers();
-}
-
-inherit(tetrahedron, shape);
-
-tetrahedron.prototype.populate = function()
-{
-	var a = 1/Math.sqrt(3);
-
-/*
-	// Mathod 1: A tetrahedron with shared vertices. 
-	// Compact, perfrom better, but can't have seams (flat shading / textures)
-	this.vertices.push(vec3(0, 0, 0), vec3(0,1,0), vec3(1, 0, 0), vec3(0, 0, 1));
-	this.normals.push(vec3(-a, -a, -a), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, 1));
-	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
-	this.indices.push(0, 1, 2, 0, 1, 3, 0, 2, 3, 1, 2, 3); // Vertices shared multiple times
-*/
-	// Method 2: A tetrahedron with four independent triangles
-	this.vertices.push(vec3(0, 0, 0), vec3(0, 1, 0), vec3(1, 0, 0));
-	this.vertices.push(vec3(0, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1));
-	this.vertices.push(vec3(0, 0, 0), vec3(1, 0, 0), vec3(0, 0, 1));
-	this.vertices.push(vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0));
-
-	// Method 2 is flat shaded, sice each triangel has its own normal.
-	this.normals.push(vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1));
-	this.normals.push(vec3(1, 0, 0), vec3(1, 0, 0), vec3(1, 0, 0));
-	this.normals.push(vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0));
-	this.normals.push(vec3(a, a, a), vec3(a, a, a), vec3(a, a, a));
-
-	// Each face in method 2 also gets ites own set of texture coords 
-	// (half the image is mapped onto each face)
-	// Couldn't do this with shared vertices since it involves difference 
-	// results when approaching the same point from different directions
-	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
-	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
-	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
-	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
-	//this.texture_coords.push(vec3(0, 0, 0), vec3(0, 1, 0), vec3(1, 0, 0));
-	//this.texture_coords.push(vec3(0, 0, 0), vec3(0, 1, 0), vec3(1, 0, 0));
-	//this.texture_coords.push(vec3(0, 0, 0), vec3(0, 1, 0), vec3(1, 0, 0));
-	//this.texture_coords.push(vec3(0, 0, 0), vec3(0, 1, 0), vec3(1, 0, 0));
-
-	this.indices.push(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11); // unique vertices
-}
-
 function square()
 {
 	shape.call(this);
@@ -531,11 +482,11 @@ squarePyramid.prototype.populate = function()
 	var a = 1/Math.sqrt(3);
 
 	this.vertices.push(vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0));
-	this.vertices.push(vec3(0, 0, 1), vec3(0, 1, 0), vec3(-1, 0, 0));
-	this.vertices.push(vec3(-1, 0, 0), vec3(0, 1, 0), vec3(0, 0, -1));
-	this.vertices.push(vec3(0, 0, -1), vec3(0, 1, 0), vec3(1, 0, 0));
-	this.vertices.push(vec3(1, 0, 0), vec3(0, 0, 1), vec3(-1, 0, 0));
-	this.vertices.push(vec3(1, 0, 0), vec3(0, 0, -1), vec3(-1, 0, 0));
+	this.vertices.push(vec3(0, 0, 1), vec3(-1, 0, 0), vec3(0, 1, 0));
+	this.vertices.push(vec3(0, 1, 0), vec3(0, 0, -1), vec3(-1, 0, 0));
+	this.vertices.push(vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, -1));
+	this.vertices.push(vec3(0, 0, 1), vec3(0, 0, -1), vec3(1, 0, 0));
+	this.vertices.push(vec3(0, 0, 1), vec3(-1, 0, 0), vec3(0, 0, -1));
 
 	this.normals.push(vec3(a, a, a), 	vec3(a, a, a), 		vec3(a, a, a));
 	this.normals.push(vec3(-a, a, a), 	vec3(-a, a, a), 	vec3(-a, a, a));
@@ -544,12 +495,12 @@ squarePyramid.prototype.populate = function()
 	this.normals.push(vec3(0, -1, 0), 	vec3(0, -1, 0), 	vec3(0, -1, 0));
 	this.normals.push(vec3(0, -1, 0), 	vec3(0, -1, 0), 	vec3(0, -1, 0));
 
-	this.texture_coords.push(vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0));
-	this.texture_coords.push(vec3(0, 0, 1), vec3(0, 1, 0), vec3(-1, 0, 0));
-	this.texture_coords.push(vec3(-1, 0, 0), vec3(0, 1, 0), vec3(0, 0, -1));
-	this.texture_coords.push(vec3(0, 0, -1), vec3(0, 1, 0), vec3(1, 0, 0));
-	this.texture_coords.push(vec3(1, 0, 0), vec3(0, 0, 1), vec3(-1, 0, 0));
-	this.texture_coords.push(vec3(1, 0, 0), vec3(0, 0, -1), vec3(-1, 0, 0));
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
+	this.texture_coords.push(vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1));
 
 	this.indices.push(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
 }
@@ -582,3 +533,4 @@ function capped_cylinder() // Combine a tube and two flattened triangle fans to 
 }
 
 inherit(capped_cylinder, shape);
+

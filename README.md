@@ -6,5 +6,48 @@ Spring 2016
 
 Programming language: javascript
 
-The main code for animation is in file "sample_project/animation.js"
+The main code for animation is in files:
+	sample_project/animation.js
+	sample_project/shapes.js
 
+Type: animation
+
+Press ALT+a to start the animation
+
+Note:
+  If the animation has no sound, please refresh the html page and press ALT+a again.
+
+
+Hierarchical:
+ - turtle
+    - body
+       - half sphere
+       - legs
+    - bodySide
+    - head
+    - neck
+    - eye
+    - eyebrow
+    - tail
+ - tree
+    - trunk (squarePyramid)
+       - branch (squarePyramid)
+    - leaves
+       - leaf (triangle)
+ - grass
+
+
+Polygonal:
+ - triangle
+ - square
+ - squarePyramid
+
+Texture mapped objects:
+ - river
+ - sky
+ - grass
+ - turtle skin
+ - turtle body
+ - leaves
+ - trunk
+ - stone
