@@ -15,8 +15,9 @@
 ---
 
 **Note:**
+ - Open sample_project/index.html (recommand to open it in Firefox browser) 
  - Press ALT+a to start the animation.
- - If the animation has no sound, please refresh the html page and press ALT+a again.
+ - If the animation has no sound, please refresh the page and press ALT+a again.
 
 ---
 ####Hierarchical:
