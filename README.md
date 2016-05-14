@@ -4,18 +4,19 @@ CS 174A Assignment 2
 
 Spring 2016
 
-Programming language: javascript
+Programming language: 
+ - javascript
 
 The main code for animation is in files:
-	sample_project/animation.js
-	sample_project/shapes.js
+ - sample_project/animation.js
+ - sample_project/shapes.js
 
-Type: animation
-
-Press ALT+a to start the animation
+Type:
+ - animation
 
 Note:
-  If the animation has no sound, please refresh the html page and press ALT+a again.
+ - Press ALT+a to start the animation.
+ - If the animation has no sound, please refresh the html page and press ALT+a again.
 
 
 Hierarchical:
