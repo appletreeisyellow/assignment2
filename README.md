@@ -1,25 +1,25 @@
 # assignment2
 
-CS 174A Assignment 2 
+**CS 174A Assignment**
 
-Spring 2016
+**Spring 2016**
 
-Programming language: 
- - javascript
+**Programming language:** javascript  
 
-The main code for animation is in files:
+**Type:** animation
+
+**Main code for this animation:**
  - sample_project/animation.js
  - sample_project/shapes.js
 
-Type:
- - animation
+---
 
-Note:
+###Note:
  - Press ALT+a to start the animation.
  - If the animation has no sound, please refresh the html page and press ALT+a again.
 
-
-Hierarchical:
+---
+###Hierarchical:
  - turtle
     - body
        - half sphere
@@ -38,12 +38,12 @@ Hierarchical:
  - grass
 
 
-Polygonal:
+##Polygonal:
  - triangle
  - square
  - squarePyramid
 
-Texture mapped objects:
+##Texture mapped objects:
  - river
  - sky
  - grass
