@@ -20,7 +20,7 @@
  - If the animation has no sound, please refresh the page and press ALT+a again.
 
 ---
-####Hierarchical:
+#### Hierarchical:
  - turtle
     - body
        - half sphere
@@ -39,12 +39,12 @@
  - grass
 
 
-####Polygonal:
+#### Polygonal:
  - triangle
  - square
  - squarePyramid
 
-####Texture mapped objects:
+#### Texture mapped objects:
  - river
  - sky
  - grass
